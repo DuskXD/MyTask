@@ -59,20 +59,39 @@ class authController {
             res.json(users)
         }catch (e) {
             console.log(e)
+            res.status(400).json({message:'User not found'})
         }
     }
     async GetUserWithId(req, res) {
         try{
-            const user = await Users.findById(req)
-            res.json(user)
+            const users = await Users.findById(req.params.id)
+            if(users) {
+               return res.json(users)
+            }
+
         }catch (e) {
             console.log(e)
+            res.status(400).json({message:'User not found'})
         }
+
+
     }
     async GetUserInform(req, res) {
         try{
+            if (req.headers && req.headers.authorization) {
+                let authorization = req.headers.authorization.split(' ')[1], decoded;
+                try {
+                    decoded = jwt.verify(authorization, secret.secret);
+                } catch (e) {
+                    return res.status(401).send('You do not have permission to access');
+                }
+                let userId = decoded.id;
 
-        }catch (e) {
+                Users.findOne({_id: userId}).then(function(user){
+                    return res.json(user);
+                });
+            }
+        }catch (e){
             console.log(e)
         }
     }
